@@ -1,1 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Ulang Tahun!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --rose-gold: #b76e79;
+            --rose-gold-dark: #a05d68;
+            --rose-gold-light: #e0bfb8;
+            --bg-color: #fcf8f8;
+            --text-dark: #4a4a4a;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-color) 0%, #f4e3e1 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden; 
+            position: relative;
+            padding-bottom: 50px; 
+        }
+        
+        /* --- AREA UTAMA --- */
+        #welcome-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 1000; transition: opacity 1s ease;
+        }
+        #main-content {
+            display: none; flex-direction: column; align-items: center;
+            padding: 30px 20px; width: 100%; position: relative; z-index: 1;
+            animation: fadeIn 1.5s ease;
+        }
 
+        /* --- DEKORASI BACKGROUND --- */
+        .bg-decorations {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: -1; pointer-events: none;
+        }
+        .decor-item {
+            position: absolute; font-size: 3rem; opacity: 0.25;
+            filter: grayscale(30%) sepia(20%) hue-rotate(320deg);
+            animation: float 8s ease-in-out infinite;
+        }
+        .item-1 { top: 10%; left: 10%; animation-delay: 0s; font-size: 4rem;} 
+        .item-2 { top: 20%; right: 15%; animation-delay: 2s; } 
+        .item-3 { bottom: 15%; left: 15%; animation-delay: 4s; font-size: 3.5rem;} 
+        .item-4 { bottom: 25%; right: 10%; animation-delay: 1s; } 
+        .item-5 { top: 50%; left: 5%; animation-delay: 3s; font-size: 2.5rem;} 
+        .item-6 { top: 60%; right: 5%; animation-delay: 5s; font-size: 3rem; } 
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-25px) rotate(10deg); }
+        }
+
+        /* --- TYPOGRAPHY & BUTTONS --- */
+        h1, h2 { font-family: 'Dancing Script', cursive; color: var(--rose-gold); }
+        h1 { font-size: 3.5rem; margin-bottom: 10px; }
+        p { font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px; max-width: 600px; text-align: center; }
+        .btn {
+            background-color: var(--rose-gold); color: white; border: none;
+            padding: 12px 30px; font-size: 1.1rem; font-family: 'Poppins', sans-serif;
+            border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(183, 110, 121, 0.3);
+            transition: all 0.3s ease; text-decoration: none; display: inline-block;
+        }
+        .btn:hover { transform: scale(1.05); background-color: var(--rose-gold-dark); }
+        
+        /* --- ELEMEN INTERAKTIF --- */
+        #gift-container {
+            font-size: 6rem; cursor: pointer; margin: 30px 0;
+            animation: bounce 2s infinite; position: relative; z-index: 2;
+            transition: transform 0.3s ease;
+        }
+        #gift-container:hover { transform: scale(1.1) rotate(5deg); }
+        
+        #letter {
+            display: none; background: rgba(255, 255, 255, 0.95); padding: 40px;
+            border-radius: 20px; box-shadow: 0 15px 35px rgba(183, 110, 121, 0.15);
+            border-top: 6px solid var(--rose-gold); margin-top: 20px; margin-bottom: 40px;
+            max-width: 500px; text-align: left; animation: slideUp 0.8s ease; position: relative; z-index: 2;
+        }
+
+        /* --- BAGIAN SETELAH SURAT (LILIN SAJA) --- */
+        #post-letter-content {
+            display: none; 
+            flex-direction: column; align-items: center; width: 100%;
+            animation: fadeIn 2s ease 0.5s forwards; opacity: 0;
+            margin-top: 20px;
+        }
+
+        .candle-container {
+            position: relative; width: 60px; height: 160px; margin: 30px auto;
+            cursor: pointer;
+        }
+        .flame {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 25px; height: 35px;
+            background: linear-gradient(to bottom, #ffeb3b 0%, #ff9800 100%);
+            border-radius: 50% 50% 20% 20%;
+            filter: drop-shadow(0 0 10px #ff9800);
+            animation: flicker 0.5s infinite alternate;
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+        .flame.blown { opacity: 0; transform: translateX(-50%) scale(0.5); }
+        
+        .wick {
+            position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 15px; background: #ad6c75;
+        }
+        .candle-body {
+            position: absolute; top: 45px; left: 50%; transform: translateX(-50%);
+            width: 50px; height: 115px;
+            background: linear-gradient(to right, var(--rose-gold-light), var(--rose-gold), var(--rose-gold-light));
+            border-radius: 5px; border-bottom: 3px solid var(--rose-gold-dark);
+        }
+        #wish-message {
+            opacity: 0; color: var(--rose-gold-dark); font-weight: 600;
+            transition: opacity 1s ease; margin-top: -20px; margin-bottom: 20px;
+        }
+        #wish-message.show { opacity: 1; }
+
+        /* --- KONTROL MUSIK & ANIMASI --- */
+        #music-control {
+            position: fixed; bottom: 20px; right: 20px; background: white;
+            border: 2px solid var(--rose-gold-light); color: var(--rose-gold);
+            border-radius: 50%; width: 50px; height: 50px; display: none;
+            justify-content: center; align-items: center; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 1.2rem; z-index: 100;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-20px); } 60% { transform: translateY(-10px); } }
+        @keyframes flicker { 0% { transform: translateX(-50%) scale(1); opacity: 1; } 100% { transform: translateX(-50%) scale(0.9); opacity: 0.8; } }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop><source src="hbd-song.mp3" type="audio/mpeg"></audio>
+
+    <div id="welcome-screen">
+        <h1 style="font-size: 2.5rem;">Hai, Nayla! Ada sesuatu buat kamu...</h1>
+        <button class="btn" onclick="startExperience()">Buka Sekarang</button>
+    </div>
+
+    <div class="bg-decorations">
+        <span class="decor-item item-1">🎂</span> <span class="decor-item item-2">✨</span>
+        <span class="decor-item item-3">🎁</span> <span class="decor-item item-4">🥳</span>
+        <span class="decor-item item-5">✨</span> <span class="decor-item item-6">🎈</span>
+    </div>
+
+    <div id="main-content">
+        <h1>Happy Birthday, Nayla!</h1>
+        <p>Semoga hari ini seindah senyumanmu.<br> Ini kado nya, coba dong buka!</p>
+        
+        <div id="gift-container" onclick="openGift()">🎁</div>
+
+        <div id="letter">
+            <h2 style="margin-bottom: 15px; font-size: 2.2rem;">Dear Nayla,</h2>
+            <p>Selamat ulang tahun yang ke-19! 🎉 Semoga di usia yang baru ini kamu selalu sehat, bahagia, dan dikelilingi orang-orang yang sayang sama kamu.</p>
+            <p>Terima kasih sudah melakukan yang terbaik selama setahun ini. *You deserve all the best things in the world!* ✨</p>
+            <p style="margin-top: 20px; font-weight: 600; color: var(--rose-gold); text-align: right;">- Rif'an</p>
+        </div>
+
+        <div id="post-letter-content">
+            <div style="text-align: center;">
+                <p style="margin-bottom: 10px; font-weight: 600;">Satu lagi...</p>
+                <p style="font-size: 1rem;">Tutup mata, buat permohonan, lalu <b>klik lilinnya</b> untuk meniup!</p>
+                
+                <div class="candle-container" onclick="blowCandle(this)">
+                    <div class="flame" id="flameIcon"></div>
+                    <div class="wick"></div>
+                    <div class="candle-body"></div>
+                </div>
+                
+                <p id="wish-message">✨ Yey! Semoga semua permohonanmu segera terwujud! ✨</p>
+            </div>
+            
+            <p style="margin-top: 40px; font-size: 0.9rem; opacity: 0.7;">Dibuat spesial untukmu. 2 Maret.</p>
+        </div>
+    </div>
+
+    <button id="music-control" onclick="toggleMusic()">🎵</button>
+
+    <script>
+        const bgMusic = document.getElementById("bgMusic");
+        const musicControl = document.getElementById("music-control");
+        let isPlaying = false;
+
+        function startExperience() {
+            document.getElementById("welcome-screen").style.opacity = "0";
+            setTimeout(() => {
+                document.getElementById("welcome-screen").style.display = "none";
+                document.getElementById("main-content").style.display = "flex";
+                musicControl.style.display = "flex";
+            }, 1000);
+            bgMusic.play().then(() => { isPlaying = true; }).catch(() => { musicControl.innerHTML = "🔇"; isPlaying = false; });
+            fireConfetti();
+        }
+
+        function openGift() {
+            document.getElementById("gift-container").style.display = "none";
+            document.getElementById("letter").style.display = "block";
+            document.getElementById("post-letter-content").style.display = "flex";
+            fireConfetti();
+            setTimeout(() => {
+                document.getElementById("letter").scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        }
+
+        let candleBlown = false;
+        function blowCandle(container) {
+            if (!candleBlown) {
+                document.getElementById("flameIcon").classList.add("blown");
+                document.getElementById("wish-message").classList.add("show");
+                confetti({ origin: { y: 0.7 }, particleCount: 30, spread: 40, colors: ['#FFD700', '#FFA500'] }); 
+                candleBlown = true;
+            }
+        }
+
+        function toggleMusic() {
+            if (isPlaying) { bgMusic.pause(); musicControl.innerHTML = "🔇"; } else { bgMusic.play(); musicControl.innerHTML = "🎵"; }
+            isPlaying = !isPlaying;
+        }
+
+        function fireConfetti() {
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#b76e79', '#e0bfb8', '#ffffff', '#FFD700'] });
+        }
+    </script>
+</body>
+</html>
